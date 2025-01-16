@@ -19,6 +19,10 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
+      - name: Get lowercase owner
+        id: owner
+        run: echo "OWNER=${GITHUB_REPOSITORY_OWNER,,}" >> $GITHUB_OUTPUT
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v1
 
@@ -37,5 +41,5 @@ jobs:
         with:
           context: .
           push: true
-          tags: ghcr.io/${{ toLowerCase(github.repository_owner) }}/airplane-notifier:latest
+          tags: ghcr.io/${{ steps.owner.outputs.OWNER }}/airplane-notifier:latest
           platforms: linux/${{ matrix.arch }}
