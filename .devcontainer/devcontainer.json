@@ -1,0 +1,13 @@
+{
+    "name": "airplane-notifier ARM meson64",
+    "build": {
+        "dockerfile": "Dockerfile",
+        "args": {
+            "VARIANT": "buster"
+        }
+    },
+    "settings": {},
+    "extensions": [],
+    "postCreateCommand": "rustup target add armv8-unknown-linux-gnueabihf",
+    "remoteUser": "vscode"
+}
