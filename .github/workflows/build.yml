@@ -12,9 +12,6 @@ permissions:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [amd64, i386, arm32v7, arm64v8]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -42,4 +39,4 @@ jobs:
           context: .
           push: true
           tags: ghcr.io/${{ steps.owner.outputs.OWNER }}/airplane-notifier:latest
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/amd64,linux/arm64
