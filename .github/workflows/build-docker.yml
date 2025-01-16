@@ -8,9 +8,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        arch: [i686, x86_64, aarch64]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -33,4 +30,4 @@ jobs:
           context: .
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/airplane-notifier:latest
-          platforms: linux/${{ matrix.arch }}
+          platforms: linux/amd64,linux/arm64
