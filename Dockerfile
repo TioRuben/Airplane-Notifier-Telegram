@@ -4,12 +4,17 @@ FROM rust:latest as builder
 WORKDIR /app
 COPY . .
 
-RUN cargo build --release
+RUN apt-get update && apt-get install -y pkg-config libssl-dev \
+    && cargo build --release
 
 # Runner stage
-FROM debian:buster-slim
+FROM debian:bookworm-slim
 
 WORKDIR /app
+
+# Install required libraries
+RUN apt-get update && apt-get install -y libssl3 ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /app/target/release/airplane-notifier /app/airplane-notifier
 
