@@ -1,9 +1,17 @@
-FROM rust:latest
+# Build stage
+FROM rust:latest as builder
 
 WORKDIR /app
 COPY . .
 
 RUN cargo build --release
+
+# Runner stage
+FROM debian:buster-slim
+
+WORKDIR /app
+
+COPY --from=builder /app/target/release/airplane-notifier /app/airplane-notifier
 
 ENV BEAST_HOST="127.0.0.1" \
     BEAST_PORT=30005 \
@@ -14,4 +22,4 @@ ENV BEAST_HOST="127.0.0.1" \
     TELEGRAM_BOT_TOKEN="your-bot-token" \
     TELEGRAM_CHAT_ID="your-chat-id"
 
-CMD ["./target/release/airplane-notifier"]
+CMD ["./airplane-notifier"]
