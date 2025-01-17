@@ -11,9 +11,9 @@ A Rust application that monitors aircraft in your vicinity using ADS-B data and 
 
 ## Prerequisites
 
-- Rust toolchain
 - ADS-B receiver outputting Beast format data (like dump1090)
 - Telegram bot token and chat ID
+
 
 ## Configuration
 
@@ -30,7 +30,33 @@ TELEGRAM_BOT_TOKEN=your_bot_token
 TELEGRAM_CHAT_ID=your_chat_id
 ```
 
+## Running with Docker
+
+You can pull the image either from GHCR or Docker Hub
+
+```
+docker pull ghcr.io/tioruben/airplane-notifier:latest
+```
+
+```
+docker pull tioruben/airplane-notifier:latest
+```
+
+Download the [.env.example](.env.example) and rename to .env Edit to fit your configuration
+
+Run the docker image using the `.env` file:
+
+```
+docker run --env-file .env ghcr.io/tioruben/airplane-notifier:latest
+```
+
+```
+docker run --env-file .env tioruben/airplane-notifier:latest
+```
+
 ## Building
+
+Rust toolchain for your arch is needed
 
 ```bash
 cargo build --release
