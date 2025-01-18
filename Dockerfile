@@ -18,8 +18,8 @@ RUN apt-get update && apt-get install -y libssl3 ca-certificates \
 
 COPY --from=builder /app/target/release/airplane-notifier /app/airplane-notifier
 
-ENV BEAST_HOST="127.0.0.1" \
-    BEAST_PORT=30005 \
+ENV JSON_HOST="127.0.0.1" \
+    JSON_PORT=30047 \
     ALERT_LAT=40.0 \
     ALERT_LON=-3.0 \
     MAX_DISTANCE=10.0 \

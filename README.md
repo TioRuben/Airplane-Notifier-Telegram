@@ -4,14 +4,14 @@ A Rust application that monitors aircraft in your vicinity using ADS-B data and 
 
 ## Features
 
-- Connects to a Beast format ADS-B data source
+- Connects to a JSON format ADS-B data source (such as dump1090)
 - Monitors aircraft within a configurable radius and altitude
 - Sends notifications via Telegram when aircraft enter the monitored zone
 - Automatically reconnects if connection is lost
 
 ## Prerequisites
 
-- ADS-B receiver outputting Beast format data (like dump1090)
+- ADS-B receiver outputting JSON format data (like dump1090)
 - Telegram bot token and chat ID
 
 
@@ -20,8 +20,8 @@ A Rust application that monitors aircraft in your vicinity using ADS-B data and 
 Create a `.env` file in the project root with the following variables:
 
 ```env
-BEAST_HOST=localhost
-BEAST_PORT=30005
+JSON_HOST=localhost
+JSON_PORT=30005
 HOME_LAT=51.5074
 HOME_LON=-0.1278
 MAX_DISTANCE_KM=10
@@ -70,7 +70,7 @@ cargo run --release
 
 ## How it Works
 
-1. Connects to an ADS-B receiver using the Beast binary protocol
+1. Connects to an ADS-B receiver using the JSON protocol from dump1090
 2. Decodes aircraft position messages
 3. Calculates distance from your location using the Haversine formula
 4. Sends Telegram notifications when aircraft enter your monitored zone

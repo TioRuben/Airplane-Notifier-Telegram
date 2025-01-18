@@ -1,5 +1,5 @@
-mod beast;
-use crate::beast::Beast;
+mod json_decoder;
+use crate::json_decoder::JsonDecoder;
 use dotenv::dotenv;
 use std::collections::HashMap;
 use std::env;
@@ -40,22 +40,22 @@ async fn main() {
     println!("Starting Airplane Notifier...");
 
     // Send initialization message
-    if let Err(e) = send_telegram_notification(
-        &config.telegram_token,
-        &config.telegram_chat_id,
-        format!(
-            "🛩 Airplane Notifier started! Monitoring area within {}km and below {}ft",
-            config.max_distance, config.max_altitude
-        ),
-    ).await {
-        println!("Failed to send init message: {}", e);
-    }
+    // if let Err(e) = send_telegram_notification(
+    //     &config.telegram_token,
+    //     &config.telegram_chat_id,
+    //     format!(
+    //         "🛩 Airplane Notifier started! Monitoring area within {}km and below {}ft",
+    //         config.max_distance, config.max_altitude
+    //     ),
+    // ).await {
+    //     println!("Failed to send init message: {}", e);
+    // }
 
     println!("Monitoring area within {}km and below {}ft", config.max_distance, config.max_altitude);
 
     let mut aircraft_map: HashMap<String, Aircraft> = HashMap::new();
-    let host = env::var("BEAST_HOST").unwrap();
-    let port = env::var("BEAST_PORT").unwrap();
+    let host = env::var("JSON_HOST").unwrap();
+    let port = env::var("JSON_PORT").unwrap();
 
     loop {
         match connect_and_process(&config, &mut aircraft_map, &host, &port).await {
@@ -73,29 +73,29 @@ async fn connect_and_process(
     port: &str,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let stream = TcpStream::connect(format!("{}:{}", host, port)).await?;
-    let mut beast = Beast::new(stream);
+    let mut decoder = JsonDecoder::new(stream);
 
-    while let Ok(msg) = beast.next().await {
-        if let Some((icao, pos)) = msg.get_aircraft_position() {
+    while let Ok(data) = decoder.next().await {
+        if let (Some(lat), Some(lon), Some(alt)) = (data.lat, data.lon, data.alt_baro) {
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
                 .as_secs();
 
-            let aircraft = aircraft_map.entry(icao.to_string()).or_insert(Aircraft {
+            let hex_code = data.hex.clone();
+            let aircraft = aircraft_map.entry(hex_code).or_insert(Aircraft {
                 last_seen: now,
-                latitude: pos.latitude,
-                longitude: pos.longitude,
-                altitude: pos.altitude,
+                latitude: lat,
+                longitude: lon,
+                altitude: alt,
                 notified: false,
             });
-
+            
             aircraft.last_seen = now;
-            aircraft.latitude = pos.latitude;
-            aircraft.longitude = pos.longitude;
-            aircraft.altitude = pos.altitude;
-
-            check_and_notify(config, &icao, aircraft).await?;
+            aircraft.latitude = lat;
+            aircraft.longitude = lon;
+            aircraft.altitude = alt;
+            check_and_notify(config, &data.hex, aircraft).await?;
         }
 
         // Clean up old aircraft
