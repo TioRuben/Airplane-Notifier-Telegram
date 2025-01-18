@@ -132,11 +132,6 @@ async fn check_and_notify(
         haversine::Units::Kilometers,
     );
 
-    println!(
-        "Aircraft: {} ({}) at {:.1}km, {:.0}ft",
-        desc, aircraft_type, distance, aircraft.altitude
-    );
-
     if distance <= config.max_distance && aircraft.altitude <= config.max_altitude && !aircraft.notified {
         aircraft.notified = true;
         
@@ -179,17 +174,9 @@ async fn send_telegram_notification(
 
     match request {
         Ok(req) => {
-            // Inspect the request
-            println!("{:?}", req);
-    
-            // Send the request
-            let response = client.execute(req).await?;
-            println!("{:?}", response);
-            println!("{:?}", response.text().await?);
-            // Handle the response...
+            let _response = client.execute(req).await?;
         }
         Err(e) => {
-            // Handle the error
             eprintln!("Error building the request: {:?}", e);
         }
     }
