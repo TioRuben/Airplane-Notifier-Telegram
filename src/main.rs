@@ -76,7 +76,8 @@ async fn connect_and_process(
     let mut decoder = JsonDecoder::new(stream);
 
     while let Ok(data) = decoder.next().await {
-        if let (Some(lat), Some(lon), Some(alt)) = (data.lat, data.lon, data.alt_baro) {
+
+        if let (Some(lat), Some(lon), Some(alt), Some(desc), Some(registration), Some(aircraft_type), Some(flight_id)) = (data.lat, data.lon, data.alt_baro, data.desc, data.r, data.t, data.flight) {
             let now = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .unwrap()
@@ -95,7 +96,7 @@ async fn connect_and_process(
             aircraft.latitude = lat;
             aircraft.longitude = lon;
             aircraft.altitude = alt;
-            check_and_notify(config, &data.hex, aircraft).await?;
+            check_and_notify(config, &data.hex, aircraft, desc, aircraft_type, registration, flight_id).await?;
         }
 
         // Clean up old aircraft
@@ -111,6 +112,10 @@ async fn check_and_notify(
     config: &Config,
     icao: &str,
     aircraft: &mut Aircraft,
+    desc: String,
+    aircraft_type: String,
+    registration: String,  
+    flight_id: String,
 ) -> Result<(), Box<dyn std::error::Error>> {
     let start = haversine::Location {
         latitude: config.home_lat,
@@ -127,14 +132,20 @@ async fn check_and_notify(
         haversine::Units::Kilometers,
     );
 
+    println!(
+        "Aircraft: {} ({}) at {:.1}km, {:.0}ft",
+        desc, aircraft_type, distance, aircraft.altitude
+    );
+
     if distance <= config.max_distance && aircraft.altitude <= config.max_altitude && !aircraft.notified {
         aircraft.notified = true;
+        
         send_telegram_notification(
             &config.telegram_token,
             &config.telegram_chat_id,
             format!(
-                "Aircraft {} detected!\nDistance: {:.1}km\nAltitude: {:.0}ft",
-                icao, distance, aircraft.altitude
+                "✈️ Aircraft detected!\nHex: {}\nType: {} ({})\nRegistration: {}\nDistance: {:.1}km\nAltitude: {:.0}ft\n\nhttps://www.flightradar24.com/{}",
+                icao, desc, aircraft_type, registration, distance, aircraft.altitude, flight_id
             ),
         )
         .await?;

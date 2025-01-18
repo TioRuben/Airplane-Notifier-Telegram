@@ -7,6 +7,10 @@ pub struct AircraftData {
     pub lat: Option<f64>,
     pub lon: Option<f64>,
     pub alt_baro: Option<f64>,
+    pub desc: Option<String>,      
+    pub r: Option<String>,
+    pub t: Option<String>,
+    pub flight: Option<String>,
 }
 
 pub struct JsonDecoder<R> {
@@ -23,7 +27,6 @@ impl<R: AsyncRead + Unpin> JsonDecoder<R> {
     pub async fn next(&mut self) -> Result<AircraftData, Box<dyn std::error::Error>> {
         let mut line = String::new();
         self.reader.read_line(&mut line).await?;
-        
         if line.is_empty() {
             return Err("Empty line".into());
         }
